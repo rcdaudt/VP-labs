@@ -10,7 +10,7 @@ cb2 = imread('chessboard04.png');
 cb3 = imread('chessboard05.png');
 cb4 = imread('chessboard06.png');
 
-%% Apply Harris corner detector
+%% Apply Harris corner detector - First image
 
 cb1_h = harris(cb1);
 figure;
@@ -24,7 +24,7 @@ end
 
 pause(0.2);
 
-%%
+%% Second image
 
 cb2_h = harris(cb2);
 figure;

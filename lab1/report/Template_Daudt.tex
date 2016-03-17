@@ -1,0 +1,74 @@
+\documentclass[11pt,oneside,a4paper]{article}
+
+% Packages
+\usepackage{cite}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{float}
+\usepackage{url}
+
+\begin{document}
+
+% paper title
+% can use linebreaks \\ within to get better formatting as desired
+\title{Visual Perception Lab 1 \\ Harris Corner Detector}
+%
+%
+% author names and IEEE memberships
+% note positions of commas and nonbreaking spaces ( ~ ) LaTeX will not break
+% a structure at a ~ so this keeps an author's name from being broken across
+% two lines.
+\author{Rodrigo~Caye~Daudt}
+
+
+% The paper headers
+\markboth{Lab 1}%
+{Harris Corner Detector}
+
+
+% make the title area
+\maketitle
+
+
+
+
+% Note that keywords are not normally used for peerreview papers.
+%\begin{IEEEkeywords}
+%IEEEtran, journal, \LaTeX, paper, template. ln505
+%\end{IEEEkeywords}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+
+On this practical session an implementation of the Harris corner detection algorithm was written using MATLAB.
+
+This function was first evaluated using two grayscale images of chessboards with corners clearly identifiable to the human eye. It was observed that the implemented corner detector was able to detect all the corners, but the exact location where it located the corners was not always very precise.
+
+The difference between the usage of the E and R matrices was also analysed. It was observed that the calculation of the R matrix was about 1000 times faster to be calculated than the matrix E, possibly due to the usage of only native matrix operations of MATLAB. On the other hand, the matrix E did not take long to be calculated and yielded better results.
+
+Finally, a subpixel accuracy algorithm was implemented using a MSE fit of a quadratic form, and it was observed that it could lead to unstable results in some cases. Therefore, the fit had to be checked before being used for the calculations of the subpixel accuracy.
+
+
+%\appendices
+%\section{Proof of the First Zonklar Equation}
+%Appendix one text goes here.
+%
+%\section{}
+%Appendix two text goes here.
+
+
+% use section* for acknowledgement
+%\section*{Acknowledgment}
+%The authors would like to thank...
+
+
+%\bibliographystyle{IEEEtran}
+%\bibliography{Template_Daudt}
+
+
+\end{document}
+
+

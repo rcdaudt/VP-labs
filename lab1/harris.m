@@ -34,8 +34,6 @@ tic
 for i = 1:s(1)
     for j = 1:s(2)
         M = [Ix2(i,j) Ixy(i,j);Ixy(i,j) Iy2(i,j)];
-%         evs = sort(eig(M));
-%         E(i,j) = (evs(1)+evs(2))*evs(1)/evs(2);
         E(i,j) = min(eig(M));
     end
 end
@@ -51,11 +49,6 @@ toc
 E_sup = lnms(E,5);
 R_sup = lnms(R,5);
 
-% figure;
-% imshow(E,[]);
-% figure;
-% imshow(R,[]);
-
 
 % Finding largest values
 N = 81;
@@ -68,12 +61,12 @@ for i = 1:N % Find the selected elements
     [coords(i,1), coords(i,2)] = ind2sub(s,found(1));
 end
 
-% Subpixel precision
-for i = 1:N
-    row = coords(i,1);
+% Calculate subpixel precision
+for i = 1:N % For each corner
+    row = coords(i,1); % Get coordinates
     col = coords(i,2);
-    [dx,dy] = fit_paraboloid(E(row-1:row+1,col-1:col+1));
-    coords(i,:) = coords(i,:) + [dx,dy];
+    [dx,dy] = fit_paraboloid(E(row-1:row+1,col-1:col+1)); % Call function
+    coords(i,:) = coords(i,:) + [dx,dy]; % Apply offsets
 end
     
 end

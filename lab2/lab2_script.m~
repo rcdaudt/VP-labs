@@ -113,13 +113,13 @@ points10(4,:) = ones(1,num_points);
 
 % Step 4
 projections = T*points10;
-projections_sc10 = projections;
+projections_sc = projections;
 for i = 1:3
-    projections_sc10(i,:) = projections(i,:)./projections(3,:);
+    projections_sc(i,:) = projections(i,:)./projections(3,:);
 end
 
 % Step 8
-projections_noisy = projections_sc10;
+projections_noisy = projections_sc;
 for i = 1:num_points
     if rand() <= 0.95
         projections_noisy(:,i) = projections_noisy(:,i) + [(2*rand(2,1)-1);0];
@@ -139,8 +139,8 @@ A = Q\B;
 A_hall10 = [A(1) A(2) A(3) A(4);A(5) A(6) A(7) A(8);A(9) A(10) A(11) 1];
 ratio_noisy10 = A_hall10./T;
 noisy_projections = A_hall10*points10;
-noisy_projections_sc10 = noisy_projections./[noisy_projections(3,:);noisy_projections(3,:);noisy_projections(3,:)];
-proj_diff10 = projections_sc10 - noisy_projections_sc10;
+noisy_projections_sc = noisy_projections./[noisy_projections(3,:);noisy_projections(3,:);noisy_projections(3,:)];
+proj_diff10 = projections_sc - noisy_projections_sc;
 dist10 = sqrt(proj_diff10(1,:).^2+proj_diff10(2,:).^2);
 mean_diff10 = mean(dist10)
 
@@ -153,13 +153,13 @@ points50(4,:) = ones(1,num_points);
 
 % Step 4
 projections = T*points50;
-projections_sc50 = projections;
+projections_sc = projections;
 for i = 1:3
-    projections_sc50(i,:) = projections(i,:)./projections(3,:);
+    projections_sc(i,:) = projections(i,:)./projections(3,:);
 end
 
 % Step 8
-projections_noisy = projections_sc50;
+projections_noisy = projections_sc;
 for i = 1:num_points
     if rand() <= 0.95
         projections_noisy(:,i) = projections_noisy(:,i) + [(2*rand(2,1)-1);0];
@@ -179,8 +179,8 @@ A = Q\B;
 A_hall50 = [A(1) A(2) A(3) A(4);A(5) A(6) A(7) A(8);A(9) A(10) A(11) 1];
 ratio_noisy50 = A_hall50./T;
 noisy_projections = A_hall50*points50;
-noisy_projections_sc50 = noisy_projections./[noisy_projections(3,:);noisy_projections(3,:);noisy_projections(3,:)];
-proj_diff50 = projections_sc50 - noisy_projections_sc50;
+noisy_projections_sc = noisy_projections./[noisy_projections(3,:);noisy_projections(3,:);noisy_projections(3,:)];
+proj_diff50 = projections_sc - noisy_projections_sc;
 dist50 = sqrt(proj_diff50(1,:).^2+proj_diff50(2,:).^2);
 mean_diff50 = mean(dist50)
 
@@ -193,13 +193,13 @@ points200(4,:) = ones(1,num_points);
 
 % Step 4
 projections = T*points200;
-projections_sc200 = projections;
+projections_sc = projections;
 for i = 1:3
-    projections_sc200(i,:) = projections(i,:)./projections(3,:);
+    projections_sc(i,:) = projections(i,:)./projections(3,:);
 end
 
 % Step 8
-projections_noisy = projections_sc200;
+projections_noisy = projections_sc;
 for i = 1:num_points
     if rand() <= 0.95
         projections_noisy(:,i) = projections_noisy(:,i) + [(2*rand(2,1)-1);0];
@@ -219,8 +219,8 @@ A = Q\B;
 A_hall200 = [A(1) A(2) A(3) A(4);A(5) A(6) A(7) A(8);A(9) A(10) A(11) 1];
 ratio_noisy50 = A_hall200./T;
 noisy_projections = A_hall200*points200;
-noisy_projections_sc200 = noisy_projections./[noisy_projections(3,:);noisy_projections(3,:);noisy_projections(3,:)];
-proj_diff200 = projections_sc200 - noisy_projections_sc200;
+noisy_projections_sc = noisy_projections./[noisy_projections(3,:);noisy_projections(3,:);noisy_projections(3,:)];
+proj_diff200 = projections_sc - noisy_projections_sc;
 dist200 = sqrt(proj_diff200(1,:).^2+proj_diff200(2,:).^2);
 mean_diff200 = mean(dist200)
 
@@ -235,23 +235,25 @@ num_points = 6;
 Q = zeros(2*num_points,11);
 B = zeros(2*num_points,1);
 for i = 1:num_points
-    Q(2*i-1,:) = [points(1:3,i)' (-projections_sc(1,i)*points(1:3,i)') 0 0 0 1 0];
-    Q(2*i,:) = [0 0 0 (-projections_sc(2,i)*points(1:3,i)') points(1:3,i)' 0 1];
-    B(2*i-1) = projections_sc(1,i);
-    B(2*i) = projections_sc(2,i);
+    IXui = projections(1,i);
+    IYui = projections(2,i);
+    Q(2*i-1,:) = [points(1:3,i)' (-projections(1,i)*points(1:3,i)') 0 0 0 1 0];
+    Q(2*i,:) = [0 0 0 (-projections(2,i)*points(1:3,i)') points(1:3,i)' 0 1];
+    B(2*i-1) = projections(1,i);
+    B(2*i) = projections(2,i);
 end
 X = Q\B;
 
-T1 = X(1:3)';
-T2 = X(4:6)';
-T3 = X(7:9)';
+T1 = X(1:3);
+T2 = X(4:6);
+T3 = X(7:9);
 C1 = X(10);
 C2 = X(11);
 
-u0_f = T1*T2'/(norm(T2)^2);
-v0_f = T2*T3'/(norm(T2)^2);
-au_f = norm(cross(T1',T2'))/(norm(T2)^2);
-av_f = norm(cross(T2',T3'))/(norm(T2)^2);
+u0_f = T1
+v0_f = 
+au_f = 
+av_f = 
 
 
 

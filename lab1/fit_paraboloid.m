@@ -5,6 +5,7 @@ function [dx,dy] = fit_paraboloid(M)
 A = [];
 b = [];
 
+% Build matrices for MSE fit
 for x = 1:3
     for y = 1:3
         v = [x*x y*y x*y x y 1];
@@ -16,11 +17,13 @@ end
 % Fit using MSE
 fit = A\b; % fit = [a b c d e f]'
 
-% Solve system to find maximum point
+% Solve system to find maximum point - both derivatives have value 0 at this point
 maximum = [2*fit(1) fit(3);fit(3) 2*fit(2)]\[-fit(4);-fit(5)]; % maxium = [x_max;y_max]
 
 % Find dx and dy (difference between coordinates of current maximum pixel
-% and estimated maximum position using paraboloid)
+% and estimated maximum position using paraboloid) and as long as the
+% quadratic describes a paraboloid with a maximum point. Limit offsets to
+% the range [-0.5;0.5]
 if fit(1)<0 && fit(2)<0
     dx = maximum(1) - 2;
     dx = max(min(dx,0.5),-0.5);
