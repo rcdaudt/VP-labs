@@ -57,6 +57,9 @@ hold on;
 plot([0 sx sx 0 0],[0 0 sy sy 0],'r','LineWidth',2);
 axis([0 sx 0 sy],'equal');
 grid on;
+title('Projections on camera sensor');
+xlabel('u axis');
+ylabel('v axis');
 display('Projections displayed');
 
 %% Step 6
@@ -298,7 +301,8 @@ corners = [corners px2world(sx,sy,f,au,u0,av,v0,R,t)];
 surf(reshape(corners(1,:),[2 2]),reshape(corners(2,:),[2 2]),reshape(corners(3,:),[2 2]));
 
 % Plot camera coordinate system
-quiver3([t(1) t(1) t(1)]',[t(2) t(2) t(2)]',[t(3) t(3) t(3)]',xc,yc,zc,50);
+quiver3([t(1) t(1) t(1)]',[t(2) t(2) t(2)]',[t(3) t(3) t(3)]',xc,yc,zc,50,'k');
+scatter3(t(1),t(2),t(3),'mh','Linewidth',3);
 
 % Scatter plot points on camera plane and lines from camera center to points
 for i = 1:size(points,2)
@@ -311,11 +315,7 @@ for i = 1:size(points,2)
     plot3([t(1) points(1,i)],[t(2) points(2,i)],[t(3) points(3,i)],'b');
 end
 
-
-
-
-
-
-
-
-
+title('3D representation of the scene (world coordinates)');
+xlabel('X axis');
+ylabel('Y axis');
+zlabel('Z axis');
