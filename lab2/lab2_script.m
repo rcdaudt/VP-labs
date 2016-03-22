@@ -13,7 +13,7 @@ display('Part 1');
 %% Step 1
 
 au=557.0943; av=712.9824; u0=326.3819; v0=298.6679;
-f=-80;
+f=80;
 Tx=100; Ty=0; Tz=1500;
 Phix=0.8*pi/2; Phiy=-1.8*pi/2; Phix1=pi/5;  % Euler XYX1
 sx = 640; sy = 480;% Image size:640x480
@@ -37,9 +37,8 @@ display('Intrisnic and extrisnic transformation matrices calculated');
 
 num_points = 6;
 points = 960*rand(3,num_points)-480;
-points(4,:) = ones(1,num_points);
+points(4,:) = ones(1,num_points)
 display('Random points generated');
-% scatter3(points(:,1),points(:,2),points(:,3));
 
 %% Step 4
 
@@ -53,8 +52,10 @@ display('Projections calculated');
 %% Step 5
 
 figure;
-scatter(projections(1,:),projections(2,:));
-axis('equal');
+scatter(projections_sc(1,:),projections_sc(2,:));
+hold on;
+plot([0 sx sx 0 0],[0 0 sy sy 0],'r','LineWidth',2);
+axis([0 sx 0 sy],'equal');
 grid on;
 display('Projections displayed');
 
@@ -76,7 +77,7 @@ for i = 1:num_points
 end
 
 A_hall6 = hall_cc(points,projections_noisy);
-ratio_noisy6 = A_hall6./T;
+ratio_noisy6 = A_hall6./T
 
 noisy_projections = A_hall6*points;
 noisy_projections_sc = noisy_projections./[noisy_projections(3,:);noisy_projections(3,:);noisy_projections(3,:)];
@@ -107,7 +108,7 @@ for i = 1:num_points
 end
 
 A_hall10 = hall_cc(points10,projections_noisy10);
-ratio_noisy10 = A_hall10./T;
+ratio_noisy10 = A_hall10./T
 noisy_projections = A_hall10*points10;
 noisy_projections_sc10 = noisy_projections./[noisy_projections(3,:);noisy_projections(3,:);noisy_projections(3,:)];
 proj_diff10 = projections_sc10 - noisy_projections_sc10;
@@ -137,7 +138,7 @@ for i = 1:num_points
 end
 
 A_hall50 = hall_cc(points50,projections_noisy50);
-ratio_noisy50 = A_hall50./T;
+ratio_noisy50 = A_hall50./T
 noisy_projections = A_hall50*points50;
 noisy_projections_sc50 = noisy_projections./[noisy_projections(3,:);noisy_projections(3,:);noisy_projections(3,:)];
 proj_diff50 = projections_sc50 - noisy_projections_sc50;
@@ -167,7 +168,7 @@ for i = 1:num_points
 end
 
 A_hall200 = hall_cc(points200,projections_noisy200);
-ratio_noisy50 = A_hall200./T;
+ratio_noisy200 = A_hall200./T
 noisy_projections = A_hall200*points200;
 noisy_projections_sc200 = noisy_projections./[noisy_projections(3,:);noisy_projections(3,:);noisy_projections(3,:)];
 proj_diff200 = projections_sc200 - noisy_projections_sc200;
@@ -193,7 +194,7 @@ av_diff = av - intrinsics(2,2)
 v0_diff = v0 - intrinsics(2,3)
 
 R_diff = extrinsics(1:3,1:3) - R
-t_diff = extrinsics(1:3,4) - translation
+t_diff = norm(extrinsics(1:3,4) - translation)
 
 %% Step 11 with [-1,1]
 
@@ -216,7 +217,7 @@ av_diff1 = av - intrinsics1(2,2)
 v0_diff1 = v0 - intrinsics1(2,3)
 
 R_diff1 = extrinsics1(1:3,1:3) - R
-t_diff1 = extrinsics1(1:3,4) - translation
+t_diff1 = norm(extrinsics1(1:3,4) - translation)
 
 %% Step 11 with [-2,2]
 
@@ -239,7 +240,7 @@ av_diff2 = av - intrinsics2(2,2)
 v0_diff2 = v0 - intrinsics2(2,3)
 
 R_diff2 = extrinsics2(1:3,1:3) - R
-t_diff2 = extrinsics2(1:3,4) - translation
+t_diff2 = norm(extrinsics2(1:3,4) - translation)
 
 %% Step 11 with [-3,3]
 
@@ -262,7 +263,7 @@ av_diff3 = av - intrinsics3(2,2)
 v0_diff3 = v0 - intrinsics3(2,3)
 
 R_diff3 = extrinsics3(1:3,1:3) - R
-t_diff3 = extrinsics3(1:3,4) - translation
+t_diff3 = norm(extrinsics3(1:3,4) - translation)
 
 %% Part 3
 
@@ -270,15 +271,46 @@ display('Part 3');
 
 %% Step 12
 
-% scatter3(points(1,:),points(2,:),points(3,:),'rd','LineWidth',3);
-% hold on;
-%TODO: fix camera orientation
-% plotCamera('Location',extrinsics(1:3,4)','Orientation',R,'AxesVisible',true);
-cameraParams = cameraParameters;
-showExtrinsics(cameraParams);
-% for i = 1:size(points,2)
-%     plot3([extrinsics(1,4) points(1,i)],[extrinsics(2,4) points(2,i)],[extrinsics(3,4) points(3,i)],'b');
-% end
+% Fix XYX1
+% Fix points
+% Fix Tx, Ty, Tz
+
+% Camera axes on real world coordinates
+xc = R(:,1);
+yc = R(:,2);
+zc = R(:,3);
+
+% Find camera center with respect to world coordinate system
+t = -R'*translation;
+
+% Scatter plot points
+figure;
+scatter3(points(1,:),points(2,:),points(3,:),'gd','LineWidth',3);
+hold on;
+axis('equal');
+
+%  Plot camera plane
+corners = [];
+corners = [corners px2world(0,0,f,au,u0,av,v0,R,t)];
+corners = [corners px2world(sx,0,f,au,u0,av,v0,R,t)];
+corners = [corners px2world(0,sy,f,au,u0,av,v0,R,t)];
+corners = [corners px2world(sx,sy,f,au,u0,av,v0,R,t)];
+surf(reshape(corners(1,:),[2 2]),reshape(corners(2,:),[2 2]),reshape(corners(3,:),[2 2]));
+
+% Plot camera coordinate system
+quiver3([t(1) t(1) t(1)]',[t(2) t(2) t(2)]',[t(3) t(3) t(3)]',xc,yc,zc,50);
+
+% Scatter plot points on camera plane and lines from camera center to points
+for i = 1:size(points,2)
+    p = T*points(:,i);
+    x = p(1)/p(3);
+    y = p(2)/p(3);
+    c = px2world(x,y,f,au,u0,av,v0,R,t);
+    scatter3(c(1),c(2),c(3),'r','LineWidth',2);
+    
+    plot3([t(1) points(1,i)],[t(2) points(2,i)],[t(3) points(3,i)],'b');
+end
+
 
 
 
