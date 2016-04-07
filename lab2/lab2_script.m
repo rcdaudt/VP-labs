@@ -31,13 +31,14 @@ translation = [Tx;Ty;Tz];
 T_ext(1:3,4) = translation;
 T = T_int*T_ext;
 T = T/T(end,end);
+t = -R'*translation; % Find camera center with respect to world coordinate system
 display('Intrisnic and extrisnic transformation matrices calculated');
 
 %% Step 3
 
 num_points = 6;
 points = 960*rand(3,num_points)-480;
-points(4,:) = ones(1,num_points)
+points(4,:) = ones(1,num_points);
 display('Random points generated');
 
 %% Step 4
@@ -75,7 +76,7 @@ ratio_pure = A_hall./T
 projections_noisy = projections_sc;
 for i = 1:num_points
     if rand() <= 0.95
-        projections_noisy(:,i) = projections_noisy(:,i) + [(2*rand(2,1)-1);0];
+        projections_noisy(:,i) = projections_noisy(:,i) + [(2*randn(2,1)-1);0];
     end
 end
 
@@ -87,6 +88,18 @@ noisy_projections_sc = noisy_projections./[noisy_projections(3,:);noisy_projecti
 proj_diff6 = projections_sc - noisy_projections_sc;
 dist6 = sqrt(proj_diff6(1,:).^2+proj_diff6(2,:).^2);
 mean_diff6 = mean(dist6)
+
+figure;
+scatter(projections_sc(1,:),projections_sc(2,:),'b');
+hold on;
+scatter(noisy_projections_sc(1,:),noisy_projections_sc(2,:),'r');
+plot([0 sx sx 0 0],[0 0 sy sy 0],'k','LineWidth',2);
+axis([0 sx 0 sy],'equal');
+grid on;
+title('Correct projections vs noisy Hall projections');
+xlabel('u axis');
+ylabel('v axis');
+display('Projections displayed');
 
 %% Step 9 - 10 points
 
@@ -106,7 +119,7 @@ end
 projections_noisy10 = projections_sc10;
 for i = 1:num_points
     if rand() <= 0.95
-        projections_noisy10(:,i) = projections_noisy10(:,i) + [(2*rand(2,1)-1);0];
+        projections_noisy10(:,i) = projections_noisy10(:,i) + [(2*randn(2,1)-1);0];
     end
 end
 
@@ -136,7 +149,7 @@ end
 projections_noisy50 = projections_sc50;
 for i = 1:num_points
     if rand() <= 0.95
-        projections_noisy50(:,i) = projections_noisy50(:,i) + [(2*rand(2,1)-1);0];
+        projections_noisy50(:,i) = projections_noisy50(:,i) + [(2*randn(2,1)-1);0];
     end
 end
 
@@ -166,7 +179,7 @@ end
 projections_noisy200 = projections_sc200;
 for i = 1:num_points
     if rand() <= 0.95
-        projections_noisy200(:,i) = projections_noisy200(:,i) + [(2*rand(2,1)-1);0];
+        projections_noisy200(:,i) = projections_noisy200(:,i) + [(2*randn(2,1)-1);0];
     end
 end
 
@@ -189,7 +202,8 @@ X = faugeras_cc(points,projections_sc);
 
 intrinsics = faugeras_compute_intrinsics(X);
 extrinsics = faugeras_compute_extrinsics(X);
-faug_A = faugeras_compute_pm(X)
+faug_A = faugeras_compute_pm(X);
+faug_ratio = faug_A./T
 
 au_diff = au - intrinsics(1,1)
 u0_diff = u0 - intrinsics(1,3)
@@ -201,12 +215,8 @@ t_diff = norm(extrinsics(1:3,4) - translation)
 
 %% Step 11 with [-1,1]
 
-projections_noisy1 = projections_sc;
-for i = 1:size(projections_sc,1)
-    if rand() <= 0.95
-        projections_noisy1(:,i) = projections_noisy1(:,i) + [(2*rand(2,1)-1);0];
-    end
-end
+projections_noisy1 = projections_noisy;
+
 
 X1 = faugeras_cc(points,projections_noisy1);
 
@@ -222,12 +232,25 @@ v0_diff1 = v0 - intrinsics1(2,3)
 R_diff1 = extrinsics1(1:3,1:3) - R
 t_diff1 = norm(extrinsics1(1:3,4) - translation)
 
+A_hall1 = hall_cc(points,projections_noisy1);
+noisy_projections1 = A_hall1*points;
+noisy_projections_sc1 = noisy_projections1./[noisy_projections1(3,:);noisy_projections1(3,:);noisy_projections1(3,:)];
+proj_diff1 = projections_sc - noisy_projections_sc1;
+dist1 = sqrt(proj_diff1(1,:).^2+proj_diff1(2,:).^2);
+mean_diff_hall1 = mean(dist1)
+
+noisy_projections1 = faug_A1*points;
+noisy_projections_sc1 = noisy_projections1./[noisy_projections1(3,:);noisy_projections1(3,:);noisy_projections1(3,:)];
+proj_diff1 = projections_sc - noisy_projections_sc1;
+dist1 = sqrt(proj_diff1(1,:).^2+proj_diff1(2,:).^2);
+mean_diff_faug1 = mean(dist1)
+
 %% Step 11 with [-2,2]
 
 projections_noisy2 = projections_sc;
 for i = 1:size(projections_sc,1)
     if rand() <= 0.95
-        projections_noisy2(:,i) = projections_noisy2(:,i) + [(4*rand(2,1)-2);0];
+        projections_noisy2(:,i) = projections_noisy2(:,i) + [(4*randn(2,1)-2);0];
     end
 end
 
@@ -245,12 +268,25 @@ v0_diff2 = v0 - intrinsics2(2,3)
 R_diff2 = extrinsics2(1:3,1:3) - R
 t_diff2 = norm(extrinsics2(1:3,4) - translation)
 
+A_hall2 = hall_cc(points,projections_noisy2);
+noisy_projections2 = A_hall2*points;
+noisy_projections_sc2 = noisy_projections2./[noisy_projections2(3,:);noisy_projections2(3,:);noisy_projections2(3,:)];
+proj_diff2 = projections_sc - noisy_projections_sc2;
+dist2 = sqrt(proj_diff2(1,:).^2+proj_diff2(2,:).^2);
+mean_diff_hall2 = mean(dist2)
+
+noisy_projections2 = faug_A2*points;
+noisy_projections_sc2 = noisy_projections2./[noisy_projections2(3,:);noisy_projections2(3,:);noisy_projections2(3,:)];
+proj_diff2 = projections_sc - noisy_projections_sc2;
+dist2 = sqrt(proj_diff2(1,:).^2+proj_diff2(2,:).^2);
+mean_diff_faug2 = mean(dist2)
+
 %% Step 11 with [-3,3]
 
 projections_noisy3 = projections_sc;
 for i = 1:size(projections_sc,1)
     if rand() <= 0.95
-        projections_noisy3(:,i) = projections_noisy3(:,i) + [(6*rand(2,1)-3);0];
+        projections_noisy3(:,i) = projections_noisy3(:,i) + [(6*randn(2,1)-3);0];
     end
 end
 
@@ -268,6 +304,19 @@ v0_diff3 = v0 - intrinsics3(2,3)
 R_diff3 = extrinsics3(1:3,1:3) - R
 t_diff3 = norm(extrinsics3(1:3,4) - translation)
 
+A_hall3 = hall_cc(points,projections_noisy3);
+noisy_projections3 = A_hall3*points;
+noisy_projections_sc3 = noisy_projections3./[noisy_projections3(3,:);noisy_projections3(3,:);noisy_projections3(3,:)];
+proj_diff3 = projections_sc - noisy_projections_sc3;
+dist3 = sqrt(proj_diff3(1,:).^2+proj_diff3(2,:).^2);
+mean_diff_hall3 = mean(dist3)
+
+noisy_projections3 = faug_A3*points;
+noisy_projections_sc3 = noisy_projections3./[noisy_projections3(3,:);noisy_projections3(3,:);noisy_projections3(3,:)];
+proj_diff3 = projections_sc - noisy_projections_sc3;
+dist3 = sqrt(proj_diff3(1,:).^2+proj_diff3(2,:).^2);
+mean_diff_faug3 = mean(dist3)
+
 %% Part 3
 
 display('Part 3');
@@ -283,8 +332,7 @@ xc = R(:,1);
 yc = R(:,2);
 zc = R(:,3);
 
-% Find camera center with respect to world coordinate system
-t = -R'*translation;
+
 
 % Scatter plot points
 figure;
