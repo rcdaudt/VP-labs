@@ -1,0 +1,119 @@
+Part 1
+S1: Camera 1 parameters defined
+S2: Camera 2 parameters defined
+S3: Marices calculated
+S4: Fundamental matrix calculated
+S5: Object points defined
+S6: Projections calculated
+S7: Projections displayed
+
+F_8 =
+
+    0.0000    0.0001   -0.0066
+    0.0000   -0.0000    0.0130
+   -0.0096   -0.0173    1.0000
+
+S8: Fundamental matrix F_8 was calculated using 8 points
+
+ratio =
+
+    1.0000    1.0000    1.0000
+    1.0000    1.0000    1.0000
+    1.0000    1.0000    1.0000
+
+S9: Result F_8 compared to F
+S10: Epipolar lines displayed
+S11: Noise added to projections
+
+ratio_n =
+
+    0.8070    0.0453    0.4651
+    1.0765   -0.2687   -0.1846
+    0.7155    0.1960    1.0000
+
+S12: Fundamental matrix calculated with noisy points
+
+ratio_n2 =
+
+    0.5850   -0.1797    0.2569
+    1.1866   -0.6911   -0.5514
+    0.5913    0.0026    1.0000
+
+S13: Fundamental matrix calculated with noisier points
+
+ratio_n2 =
+
+    0.6312    0.0054    0.3587
+    1.1174   -0.5194   -0.3125
+    0.6354    0.1769    1.0000
+
+S13: Fundamental matrix calculated with noisier points
+
+ratio_n2 =
+
+    0.7192   -0.1326    0.3017
+    1.1675   -0.5376   -0.4121
+    0.6764    0.0634    1.0000
+
+S13: Fundamental matrix calculated with noisier points
+
+ratio_n2 =
+
+    0.6958   -0.1086    0.3471
+    1.1177   -0.5692   -0.4249
+    0.6328    0.0667    1.0000
+
+S13: Fundamental matrix calculated with noisier points
+
+ratio_n2 =
+
+    0.6034   -0.2102    0.2102
+    1.2616   -0.6583   -0.5557
+    0.6320   -0.0111    1.0000
+
+S13: Fundamental matrix calculated with noisier points
+
+ratio_n2 =
+
+    0.5911   -0.0088    0.3376
+    1.1181   -0.4815   -0.3516
+    0.6265    0.1361    1.0000
+
+S13: Fundamental matrix calculated with noisier points
+Part 2
+
+ratio_svd =
+
+    1.0000    1.0000    1.0000
+    1.0000    1.0000    1.0000
+    1.0000    1.0000    1.0000
+
+S14: Fundamental matrix calculated using SVD
+
+ratio_n =
+
+    0.8070    0.0453    0.4652
+    1.0765   -0.2687   -0.1846
+    0.7155    0.1960    1.0000
+
+S15-1: Fundamental matrix calculated with noisy points and SVD
+
+ratio_n2 =
+
+    0.5911   -0.0088    0.3376
+    1.1181   -0.4815   -0.3516
+    0.6265    0.1361    1.0000
+
+S15-2: Fundamental matrix calculated with noisier points and SVD
+
+mean_dist_ls =
+
+    1.3597
+
+
+mean_dist_svd =
+
+    1.3596
+
+S16: Mean distance between epipolar lines and points calculated for LS and SVD methods
+>> 

@@ -75,12 +75,21 @@ V(:,17) = [300;400;3000;1];
 V(:,18) = [500;400;4000;1];
 V(:,19) = [700;400;2000;1];
 V(:,20) = [900;400;3000;1];
+
+morepoints = [(800*rand(1,30)+100);(800*rand(1,30)-400);(2000*rand(1,30)+200);ones(1,30)];
+V50 = [V morepoints];
+
+morepoints = [(800*rand(1,100)+100);(800*rand(1,100)-400);(2000*rand(1,100)+200);ones(1,100)];
+V150 = [V50 morepoints];
+
 display('S5: Object points defined')
 
 %% Step 6
 
 A1 = [I1 zeros(3,1)]*[eye(3) zeros(3,1);0 0 0 1];
 A2 = [I2 zeros(3,1)]*CTW;
+
+% 20 points
 p1 = zeros(3,size(V,2));
 p2 = zeros(3,size(V,2));
 for i = 1:size(V,2)
@@ -89,6 +98,27 @@ for i = 1:size(V,2)
 end
 p1 = normalise_scale(p1);
 p2 = normalise_scale(p2);
+
+% 50 points
+p1_50 = zeros(3,size(V50,2));
+p2_50 = zeros(3,size(V50,2));
+for i = 1:size(V50,2)
+    p1_50(:,i) = A1*V50(:,i);
+    p2_50(:,i) = A2*V50(:,i);
+end
+p1_50 = normalise_scale(p1_50);
+p2_50 = normalise_scale(p2_50);
+
+% 150 points
+p1_150 = zeros(3,size(V150,2));
+p2_150 = zeros(3,size(V150,2));
+for i = 1:size(V150,2)
+    p1_150(:,i) = A1*V150(:,i);
+    p2_150(:,i) = A2*V150(:,i);
+end
+p1_150 = normalise_scale(p1_150);
+p2_150 = normalise_scale(p2_150);
+
 display('S6: Projections calculated')
 
 
@@ -99,18 +129,56 @@ plot([0 sx1 sx1 0 0],[0 0 sy1 sy1 0],'k','LineWidth',3);
 hold on;
 grid on;
 axis('equal');
-title('Camera 1');
+title('Camera 1 - 20 points');
 figure(2);
 plot([0 sx2 sx2 0 0],[0 0 sy2 sy2 0],'k','LineWidth',3);
 hold on;
 grid on;
 axis('equal');
-title('Camera 2');
+title('Camera 2 - 20 points');
 for i = 1:size(V,2)
     figure(1)
     scatter(p1(1,i),p1(2,i));
     figure(2)
     scatter(p2(1,i),p2(2,i));
+end
+
+figure(3);
+plot([0 sx1 sx1 0 0],[0 0 sy1 sy1 0],'k','LineWidth',3);
+hold on;
+grid on;
+axis('equal');
+title('Camera 1 - 50 points');
+figure(4);
+plot([0 sx2 sx2 0 0],[0 0 sy2 sy2 0],'k','LineWidth',3);
+hold on;
+grid on;
+axis('equal');
+title('Camera 2 - 50 points');
+for i = 1:size(V50,2)
+    figure(3)
+    scatter(p1_50(1,i),p1_50(2,i));
+    figure(4)
+    scatter(p2_50(1,i),p2_50(2,i));
+end
+
+figure(5);
+plot([0 sx1 sx1 0 0],[0 0 sy1 sy1 0],'k','LineWidth',3);
+hold on;
+grid on;
+axis('equal');
+title('Camera 1 - 150 points');
+figure(6);
+plot([0 sx2 sx2 0 0],[0 0 sy2 sy2 0],'k','LineWidth',3);
+hold on;
+grid on;
+axis('equal');
+title('Camera 2 - 150 points');
+for i = 1:size(V150,2)
+    figure(5)
+    scatter(p1_150(1,i),p1_150(2,i));
+    figure(6)
+    scatter(p2_150(1,i),p2_150(2,i));
 end
 
 display('S7: Projections displayed')
@@ -177,59 +245,27 @@ display('S10: Epipolar lines displayed')
 p1_n = p1 + [0.5*randn(2,size(V,2)); zeros(1,size(V,2))];
 p2_n = p2 + [0.5*randn(2,size(V,2)); zeros(1,size(V,2))];
 
+p1_50_n = p1_50 + [0.5*randn(2,size(V50,2)); zeros(1,size(V50,2))];
+p2_50_n = p2_50 + [0.5*randn(2,size(V50,2)); zeros(1,size(V50,2))];
+
+p1_150_n = p1_150 + [0.5*randn(2,size(V150,2)); zeros(1,size(V150,2))];
+p2_150_n = p2_150 + [0.5*randn(2,size(V150,2)); zeros(1,size(V150,2))];
+
 display('S11: Noise added to projections');
 
 %% Step 12
 
-% Compute fundamental matrix with 8 noisy points
-F_8_n = compute_F(p1_n,p2_n);
-[Un,Sn,Vn] = svd(F_8_n);
-Sn(end,end) = 0;
-F_8_n = Un*Sn*Vn';
+% Calculate everything and compare to true F
+[F_mse_20,epip1_diff_F_mse_20,epip2_diff_F_mse_20] = plot_epips(p1_n,p2_n,epip1,epip2,'(20 points, noise [-1,1])')
+ratio_mse_20 = F_mse_20./F
 
-% Compare to true F
-ratio_n = F_8_n./F
+[F_mse_50,epip1_diff_F_mse_50,epip2_diff_F_mse_50] = plot_epips(p1_50_n,p2_50_n,epip1,epip2,'(50 points, noise [-1,1])')
+ratio_mse_50 = F_mse_50./F
 
-
-% Calculate and plot epipolar lines and epipoles
-epip1 = normalise_scale(A1*[T;1]);
-x = [min(0,epip1(1)-10),max(256,epip1(1))+10];
-figure;
-% subplot(1,2,1);
-hold on;
-grid on;
-for i = 1:size(p1_n,2)
-    scatter(p1_n(1,i),p1_n(2,i),'b');
-    lm = F_8_n'*p2_n(:,i);
-    m = -lm(1)/lm(2);
-    d = -lm(3)/lm(2);
-    y = m*x + d;
-    plot(x,y,'r');
-end
-plot([0 sx1 sx1 0 0],[0 0 sy1 sy1 0],'k');
-scatter(epip1(1),epip1(2),'gh','LineWidth',2);
-axis('equal');
-title('Camera 1 (noisy [-1,1])');
+[F_mse_150,epip1_diff_F_mse_150,epip2_diff_F_mse_150] = plot_epips(p1_150_n,p2_150_n,epip1,epip2,'(150 points, noise [-1,1])')
+ratio_mse_150 = F_mse_150./F
 
 
-epip2 = normalise_scale(A2*[0;0;0;1]);
-x = [min(0,epip2(1))-10,max(256,epip2(1))+10];
-% subplot(1,2,2);
-figure;
-hold on;
-grid on;
-for i = 1:size(p1_n,2)
-    scatter(p2_n(1,i),p2_n(2,i),'b');
-    lm = F_8_n*p1_n(:,i);
-    m = -lm(1)/lm(2);
-    d = -lm(3)/lm(2);
-    y = m*x + d;
-    plot(x,y,'r');
-end
-plot([0 sx2 sx2 0 0],[0 0 sy2 sy2 0],'k');
-scatter(epip2(1),epip2(2),'gh','LineWidth',2);
-axis('equal');
-title('Camera 2 (noisy [-1,1])');
 
 display('S12: Fundamental matrix calculated with noisy points')
 
@@ -239,55 +275,24 @@ display('S12: Fundamental matrix calculated with noisy points')
 p1_n2 = p1 + [randn(2,size(V,2)); zeros(1,size(V,2))];
 p2_n2 = p2 + [randn(2,size(V,2)); zeros(1,size(V,2))];
 
-% Compute fundamental matrix with 8 noisy points
-F_8_n2 = compute_F(p1_n2,p2_n2);
-[Un,Sn,Vn] = svd(F_8_n2);
-Sn(end,end) = 0;
-F_8_n2 = Un*Sn*Vn';
+p1_50_n2 = p1_50 + [randn(2,size(V50,2)); zeros(1,size(V50,2))];
+p2_50_n2 = p2_50 + [randn(2,size(V50,2)); zeros(1,size(V50,2))];
 
-% Compare to true F
-ratio_n2 = F_8_n2./F
+p1_150_n2 = p1_150 + [randn(2,size(V150,2)); zeros(1,size(V150,2))];
+p2_150_n2 = p2_150 + [randn(2,size(V150,2)); zeros(1,size(V150,2))];
 
 
-% Calculate and plot epipolar lines and epipoles
-epip1 = normalise_scale(A1*[T;1]);
-x = [min(0,epip1(1)-10),max(256,epip1(1))+10];
-figure;
-% subplot(1,2,1);
-hold on;
-grid on;
-for i = 1:size(p1_n2,2)
-    scatter(p1_n2(1,i),p1_n2(2,i),'b');
-    lm = F_8_n2'*p2_n2(:,i);
-    m = -lm(1)/lm(2);
-    d = -lm(3)/lm(2);
-    y = m*x + d;
-    plot(x,y,'r');
-end
-plot([0 sx1 sx1 0 0],[0 0 sy1 sy1 0],'k');
-scatter(epip1(1),epip1(2),'gh','LineWidth',2);
-axis('equal');
-title('Camera 1 (noisy [-2,2])');
+% Calculate everything and compare to true F
+[F_mse2_20,epip1_diff_F_mse2_20,epip2_diff_F_mse2_20] = plot_epips(p1_n2,p2_n2,epip1,epip2,'(20 points, noise [-2,2])')
+ratio_mse2_20 = F_mse2_20./F
+
+[F_mse2_50,epip1_diff_F_mse2_50,epip2_diff_F_mse2_50] = plot_epips(p1_50_n2,p2_50_n2,epip1,epip2,'(50 points, noise [-2,2])')
+ratio_mse2_50 = F_mse2_50./F
+
+[F_mse2_150,epip1_diff_F_mse2_150,epip2_diff_F_mse2_150] = plot_epips(p1_150_n2,p2_150_n2,epip1,epip2,'(150 points, noise [-2,2])')
+ratio_mse2_150 = F_mse2_150./F
 
 
-epip2 = normalise_scale(A2*[0;0;0;1]);
-x = [min(0,epip2(1))-10,max(256,epip2(1))+10];
-% subplot(1,2,2);
-figure;
-hold on;
-grid on;
-for i = 1:size(p1_n2,2)
-    scatter(p2_n2(1,i),p2_n2(2,i),'b');
-    lm = F_8_n2*p1_n2(:,i);
-    m = -lm(1)/lm(2);
-    d = -lm(3)/lm(2);
-    y = m*x + d;
-    plot(x,y,'r');
-end
-plot([0 sx2 sx2 0 0],[0 0 sy2 sy2 0],'k');
-scatter(epip2(1),epip2(2),'gh','LineWidth',2);
-axis('equal');
-title('Camera 2 (noisy [-2,2])');
 
 display('S13: Fundamental matrix calculated with noisier points')
 
@@ -303,148 +308,98 @@ ratio_svd = F_8_svd./F_8
 
 display('S14: Fundamental matrix calculated using SVD');
 
-%% Step 15
+%% Step 15-1
 
-% Compute fundamental matrix with 8 noisy points
-F_8_n_svd = compute_F_svd(p1_n,p2_n);
-[Un,Sn,Vn] = svd(F_8_n_svd);
-Sn(end,end) = 0;
-F_8_n_svd = Un*Sn*Vn';
+% Calculate everything and compare to true F
+[F_svd_20,epip1_diff_F_svd_20,epip2_diff_F_svd_20] = plot_epips_svd(p1_n,p2_n,epip1,epip2,'(20 points, noise [-1,1])')
+ratio_svd_20 = F_svd_20./F
 
-% Compare to true F
-ratio_n = F_8_n_svd./F
+[F_svd_50,epip1_diff_F_svd_50,epip2_diff_F_svd_50] = plot_epips_svd(p1_50_n,p2_50_n,epip1,epip2,'(50 points, noise [-1,1])')
+ratio_svd_50 = F_svd_50./F
 
+[F_svd_150,epip1_diff_F_svd_150,epip2_diff_F_svd_150] = plot_epips_svd(p1_150_n,p2_150_n,epip1,epip2,'(150 points, noise [-1,1])')
+ratio_svd_150 = F_svd_150./F
 
-% Calculate and plot epipolar lines and epipoles
-epip1 = normalise_scale(A1*[T;1]);
-x = [min(0,epip1(1)-10),max(256,epip1(1))+10];
-figure;
-% subplot(1,2,1);
-hold on;
-grid on;
-for i = 1:size(p1_n,2)
-    scatter(p1_n(1,i),p1_n(2,i),'b');
-    lm = F_8_n_svd'*p2_n(:,i);
-    m = -lm(1)/lm(2);
-    d = -lm(3)/lm(2);
-    y = m*x + d;
-    plot(x,y,'r');
-end
-plot([0 sx1 sx1 0 0],[0 0 sy1 sy1 0],'k');
-scatter(epip1(1),epip1(2),'gh','LineWidth',2);
-axis('equal');
-title('Camera 1 (noisy [-1,1] SVD)');
-
-
-epip2 = normalise_scale(A2*[0;0;0;1]);
-x = [min(0,epip2(1))-10,max(256,epip2(1))+10];
-% subplot(1,2,2);
-figure;
-hold on;
-grid on;
-for i = 1:size(p1_n,2)
-    scatter(p2_n(1,i),p2_n(2,i),'b');
-    lm = F_8_n_svd*p1_n(:,i);
-    m = -lm(1)/lm(2);
-    d = -lm(3)/lm(2);
-    y = m*x + d;
-    plot(x,y,'r');
-end
-plot([0 sx2 sx2 0 0],[0 0 sy2 sy2 0],'k');
-scatter(epip2(1),epip2(2),'gh','LineWidth',2);
-axis('equal');
-title('Camera 2 (noisy [-1,1])');
 
 display('S15-1: Fundamental matrix calculated with noisy points and SVD')
 
 %% Step 15-2
 
+% Calculate everything and compare to true F
+[F_svd2_20,epip1_diff_F_svd2_20,epip2_diff_F_svd2_20] = plot_epips_svd(p1_n2,p2_n2,epip1,epip2,'(20 points, noise [-2,2])')
+ratio_svd2_20 = F_svd2_20./F
 
-% Compute fundamental matrix with 8 noisy points
-F_8_n_svd2 = compute_F(p1_n2,p2_n2);
-[Un,Sn,Vn] = svd(F_8_n_svd2);
-Sn(end,end) = 0;
-F_8_n_svd2 = Un*Sn*Vn';
+[F_svd2_50,epip1_diff_F_svd2_50,epip2_diff_F_svd2_50] = plot_epips_svd(p1_50_n2,p2_50_n2,epip1,epip2,'(50 points, noise [-2,2])')
+ratio_svd2_50 = F_svd2_50./F
 
-% Compare to true F
-ratio_n2 = F_8_n2./F
-
-
-% Calculate and plot epipolar lines and epipoles
-epip1 = normalise_scale(A1*[T;1]);
-x = [min(0,epip1(1)-10),max(256,epip1(1))+10];
-figure;
-% subplot(1,2,1);
-hold on;
-grid on;
-for i = 1:size(p1_n2,2)
-    scatter(p1_n2(1,i),p1_n2(2,i),'b');
-    lm = F_8_n_svd2'*p2_n2(:,i);
-    m = -lm(1)/lm(2);
-    d = -lm(3)/lm(2);
-    y = m*x + d;
-    plot(x,y,'r');
-end
-plot([0 sx1 sx1 0 0],[0 0 sy1 sy1 0],'k');
-scatter(epip1(1),epip1(2),'gh','LineWidth',2);
-axis('equal');
-title('Camera 1 (noisy [-2,2] SVD)');
+[F_svd2_150,epip1_diff_F_svd2_150,epip2_diff_F_svd2_150] = plot_epips_svd(p1_150_n2,p2_150_n2,epip1,epip2,'(150 points, noise [-2,2])')
+ratio_svd2_150 = F_svd2_150./F
 
 
-epip2 = normalise_scale(A2*[0;0;0;1]);
-x = [min(0,epip2(1))-10,max(256,epip2(1))+10];
-% subplot(1,2,2);
-figure;
-hold on;
-grid on;
-for i = 1:size(p1_n2,2)
-    scatter(p2_n2(1,i),p2_n2(2,i),'b');
-    lm = F_8_n_svd2*p1_n2(:,i);
-    m = -lm(1)/lm(2);
-    d = -lm(3)/lm(2);
-    y = m*x + d;
-    plot(x,y,'r');
-end
-plot([0 sx2 sx2 0 0],[0 0 sy2 sy2 0],'k');
-scatter(epip2(1),epip2(2),'gh','LineWidth',2);
-axis('equal');
-title('Camera 2 (noisy [-2,2])');
 
 display('S15-2: Fundamental matrix calculated with noisier points and SVD')
 
+%% Step 16
 
 
+% 20 points
+dist_ls = 0;
+dist_svd = 0;
+for i = 1:size(p1,2)
+    % Least squares total distance
+    lm = F_mse_20'*p2_n(:,i);
+    dist_ls = dist_ls + abs(lm(1)*p1_n(1,i) + lm(2)*p1_n(2,i) + lm(3))/norm(lm(1:2));
+    lm = F_mse_20*p1_n(:,i);
+    dist_ls = dist_ls + abs(lm(1)*p2_n(1,i) + lm(2)*p2_n(2,i) + lm(3))/norm(lm(1:2));
+    
+    % SVD total distance
+    lm = F_svd_20'*p2_n(:,i);
+    dist_svd = dist_svd + abs(lm(1)*p1_n(1,i) + lm(2)*p1_n(2,i) + lm(3))/norm(lm(1:2));
+    lm = F_svd_20*p1_n(:,i);
+    dist_svd = dist_svd + abs(lm(1)*p2_n(1,i) + lm(2)*p2_n(2,i) + lm(3))/norm(lm(1:2));
+end
+mean_dist_ls_20 = dist_ls / (2 * size(p1,2))
+mean_dist_svd_20 = dist_svd / (2 * size(p1,2))
 
 
+% 50 points
+dist_ls = 0;
+dist_svd = 0;
+for i = 1:size(p1_50,2)
+    % Least squares total distance
+    lm = F_mse_50'*p2_50_n(:,i);
+    dist_ls = dist_ls + abs(lm(1)*p1_50_n(1,i) + lm(2)*p1_50_n(2,i) + lm(3))/norm(lm(1:2));
+    lm = F_mse_50*p1_50_n(:,i);
+    dist_ls = dist_ls + abs(lm(1)*p2_50_n(1,i) + lm(2)*p2_50_n(2,i) + lm(3))/norm(lm(1:2));
+    
+    % SVD total distance
+    lm = F_svd_50'*p2_50_n(:,i);
+    dist_svd = dist_svd + abs(lm(1)*p1_50_n(1,i) + lm(2)*p1_50_n(2,i) + lm(3))/norm(lm(1:2));
+    lm = F_svd_50*p1_50_n(:,i);
+    dist_svd = dist_svd + abs(lm(1)*p2_50_n(1,i) + lm(2)*p2_50_n(2,i) + lm(3))/norm(lm(1:2));
+end
+mean_dist_ls_50 = dist_ls / (2 * size(p1_50,2))
+mean_dist_svd_50 = dist_svd / (2 * size(p1_50,2))
 
 
+% 150 points
+dist_ls = 0;
+dist_svd = 0;
+for i = 1:size(p1_150,2)
+    % Least squares total distance
+    lm = F_mse_150'*p2_150_n(:,i);
+    dist_ls = dist_ls + abs(lm(1)*p1_150_n(1,i) + lm(2)*p1_150_n(2,i) + lm(3))/norm(lm(1:2));
+    lm = F_mse_150*p1_150_n(:,i);
+    dist_ls = dist_ls + abs(lm(1)*p2_150_n(1,i) + lm(2)*p2_150_n(2,i) + lm(3))/norm(lm(1:2));
+    
+    % SVD total distance
+    lm = F_svd_150'*p2_150_n(:,i);
+    dist_svd = dist_svd + abs(lm(1)*p1_150_n(1,i) + lm(2)*p1_150_n(2,i) + lm(3))/norm(lm(1:2));
+    lm = F_svd_150*p1_150_n(:,i);
+    dist_svd = dist_svd + abs(lm(1)*p2_150_n(1,i) + lm(2)*p2_150_n(2,i) + lm(3))/norm(lm(1:2));
+end
+mean_dist_ls_150 = dist_ls / (2 * size(p1_150,2))
+mean_dist_svd_150 = dist_svd / (2 * size(p1_150,2))
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+display('S16: Mean distance between epipolar lines and points calculated for LS and SVD methods');
